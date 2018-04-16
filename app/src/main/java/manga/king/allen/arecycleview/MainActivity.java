@@ -28,11 +28,10 @@ public class MainActivity extends AppCompatActivity {
                 android.R.color.holo_green_light,
                 android.R.color.holo_orange_light,
                 android.R.color.holo_red_light);
-//        swipeContainer.setRefreshing(true);
         swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                index = 0;
+//                index = 0;
                 listData.clear();
                 listData.addAll(generateData());
                 rv.postDelayed(new Runnable() {
@@ -41,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
                         adapter.notifyDataSetChanged();
                         swipeContainer.setRefreshing(false);
                     }
-                }, 2000);
+                }, 3000);
             }
         });
         rv = findViewById(R.id.list);
@@ -51,22 +50,36 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setUpListView(final ARecycleView rv) {
-        rv.setLayoutManager(new GridLayoutManager(getApplicationContext(), 3));
+        GridLayoutManager layoutManager = new GridLayoutManager(getApplicationContext(), 3);
+        rv.setLayoutManager(layoutManager);
         adapter = new TestAdapter(listData);
+        layoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+            @Override
+            public int getSpanSize(int position) {
+                if (position == listData.size())
+                    return 3;
+                else return 1;
+            }
+        });
+
         rv.setAdapter(adapter);
+        int oldSize = listData.size();
         listData.addAll(generateData());
-        adapter.notifyDataSetChanged();
+        int newSize = listData.size();
+        adapter.notifyItemRangeInserted(oldSize, newSize - oldSize);
         rv.setOnScrolledToEndListener(new OnScrolledToEndListener() {
             @Override
             public void onScrolledToEnd() {
                 Log.d(TAG, "Can't down");
+                final int oldSize = listData.size();
                 listData.addAll(generateData());
+                final int newSize = listData.size();
                 rv.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        adapter.notifyDataSetChanged();
+                        adapter.notifyItemRangeInserted(oldSize, newSize - oldSize);
                     }
-                }, 2000);
+                }, 800);
             }
         });
     }
