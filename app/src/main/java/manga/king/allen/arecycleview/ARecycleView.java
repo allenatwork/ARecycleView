@@ -9,6 +9,9 @@ public class ARecycleView extends RecyclerView {
     public static final int FAKE_SCROLLEND_PREVENT = 50;
     OnScrolledToEndListener onScrolledToEndListener;
     long lastScrollEnd;
+    boolean isRefreshing;
+    boolean isLoadingMore;
+
 
     public ARecycleView(Context context) {
         this(context, null);
@@ -27,6 +30,24 @@ public class ARecycleView extends RecyclerView {
 
     }
 
+    public boolean isRefreshing() {
+        return isRefreshing;
+    }
+
+    public void setRefreshing(boolean refreshing) {
+        isRefreshing = refreshing;
+        isLoadingMore = !isRefreshing;
+    }
+
+    public boolean isLoadingMore() {
+        return isLoadingMore;
+    }
+
+    public void setLoadingMore(boolean loadingMore) {
+        isLoadingMore = loadingMore;
+        isRefreshing = !isLoadingMore;
+    }
+
     public void setOnScrolledToEndListener(OnScrolledToEndListener onScrolledToEndListener) {
         this.onScrolledToEndListener = onScrolledToEndListener;
     }
@@ -34,7 +55,7 @@ public class ARecycleView extends RecyclerView {
     @Override
     public void onScrolled(int dx, int dy) {
         if (onScrolledToEndListener != null && !canScrollVertically(1)) {
-            if (System.currentTimeMillis() > lastScrollEnd + FAKE_SCROLLEND_PREVENT) {
+            if (System.currentTimeMillis() > lastScrollEnd + FAKE_SCROLLEND_PREVENT && !isLoadingMore) {
                 onScrolledToEndListener.onScrolledToEnd();
                 lastScrollEnd = System.currentTimeMillis();
             }

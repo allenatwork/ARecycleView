@@ -63,23 +63,33 @@ public class MainActivity extends AppCompatActivity {
         });
 
         rv.setAdapter(adapter);
-        int oldSize = listData.size();
-        listData.addAll(generateData());
-        int newSize = listData.size();
-        adapter.notifyItemRangeInserted(oldSize, newSize - oldSize);
+        rv.setLoadingMore(true);
+        rv.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                listData.addAll(generateData());
+                adapter.notifyDataSetChanged();
+                rv.setLoadingMore(false);
+            }
+        }, 3000);
+
+
         rv.setOnScrolledToEndListener(new OnScrolledToEndListener() {
             @Override
             public void onScrolledToEnd() {
                 Log.d(TAG, "Can't down");
-                final int oldSize = listData.size();
-                listData.addAll(generateData());
-                final int newSize = listData.size();
+
+                rv.setLoadingMore(true);
                 rv.postDelayed(new Runnable() {
                     @Override
                     public void run() {
+                        final int oldSize = listData.size();
+                        listData.addAll(generateData());
+                        final int newSize = listData.size();
                         adapter.notifyItemRangeInserted(oldSize, newSize - oldSize);
+                        rv.setLoadingMore(false);
                     }
-                }, 800);
+                }, 5000);
             }
         });
     }
